@@ -30,7 +30,7 @@ Las bibliotecas universitarias necesitan controlar su inventario de libros, qui�
 | Pruebas | JUnit 5, Mockito, MockMvc, Spring Security Test |
 | Build | Maven |
 
-> **Nota sobre Java:** la rúbrica sugiere Java 21; el entorno de desarrollo usa **JDK 17 (LTS)**. Spring Boot 3.x es totalmente compatible con Java 17 y el proyecto no depende de características exclusivas de 21, por lo que se fija 17 en `pom.xml`. Migrar a 21 solo requiere cambiar `<java.version>`.
+
 
 ## 4. Arquitectura
 
