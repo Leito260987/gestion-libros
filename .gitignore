@@ -1,0 +1,31 @@
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+*.jar
+!**/src/main/**/*.jar
+!**/src/test/**/*.jar
+
+# Secretos y entorno (NUNCA subir)
+.env
+*.env
+!.env.example
+application-local.yml
+application-secret.*
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+# Logs / SO
+*.log
+logs/
+.DS_Store
+Thumbs.db

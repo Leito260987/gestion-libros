@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: biblioteca
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/biblioteca_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: biblioteca-pool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      # 'validate' en produccion; el esquema se crea con db/schema.sql.
+      # Para desarrollo rapido puede cambiarse a 'update'.
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+
+  sql:
+    init:
+      # Los datos semilla criticos (roles/admin) se cargan por codigo (DataInitializer),
+      # portable entre MySQL y H2. Los scripts SQL quedan como referencia/entrega.
+      mode: never
+
+# Configuracion propia de la aplicacion
+app:
+  jwt:
+    secret: ${JWT_SECRET:Y2FtYmlhLWVzdGUtc2VjcmV0by1wb3ItdW5vLWFsZWF0b3Jpby1kZS0zMi1ieXRlcy1taW5pbW8=}
+    refresh-secret: ${JWT_REFRESH_SECRET:b3Ryby1zZWNyZXRvLWRpc3RpbnRvLXBhcmEtcmVmcmVzaC10b2tlbnMtZGUtMzItYnl0ZXMtbWlu}
+    expiration-ms: ${JWT_EXPIRATION:900000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
+    issuer: biblioteca-universitaria
+  admin:
+    email: ${ADMIN_EMAIL:admin@biblioteca.edu}
+    password: ${ADMIN_PASSWORD:Admin123!}
+  prestamo:
+    dias-vencimiento: 14
+
+# Documentacion OpenAPI / Swagger
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+logging:
+  level:
+    org.hibernate.SQL: ${SQL_LOG:info}
+    com.universidad.biblioteca: info

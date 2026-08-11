@@ -1,0 +1,251 @@
+{
+  "info": {
+    "name": "Biblioteca Universitaria API",
+    "description": "Coleccion completa de la API de gestion de biblioteca. El login guarda automaticamente accessToken y refreshToken en el entorno.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "libroId", "value": "1" },
+    { "key": "prestamoId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "AUTH",
+      "item": [
+        {
+          "name": "Register (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('accessToken', b.accessToken);",
+                  "pm.environment.set('refreshToken', b.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Leonardo\",\n  \"apellido\": \"Parati\",\n  \"email\": \"leonardo@biblioteca.edu\",\n  \"password\": \"Passw0rd!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('accessToken', b.accessToken);",
+                  "pm.environment.set('refreshToken', b.refreshToken);",
+                  "pm.test('devuelve accessToken', () => pm.expect(b.accessToken).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@biblioteca.edu\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Login credenciales invalidas (401)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@biblioteca.edu\",\n  \"password\": \"incorrecta\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Refresh Token (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "pm.environment.set('accessToken', pm.response.json().accessToken);"
+              ] }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "BOOKS",
+      "item": [
+        {
+          "name": "Listar / Buscar (200)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/books?page=0&size=10&sort=titulo,asc&titulo=&disponibles=true",
+              "host": ["{{baseUrl}}"], "path": ["api", "books"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "titulo,asc" },
+                { "key": "titulo", "value": "" },
+                { "key": "disponibles", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener por ID (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/books/{{libroId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{libroId}}"] } }
+        },
+        {
+          "name": "Obtener por ISBN (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/books/isbn/9780132350884", "host": ["{{baseUrl}}"], "path": ["api", "books", "isbn", "9780132350884"] } }
+        },
+        {
+          "name": "Crear libro - ADMIN (201)",
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.environment.set('libroId', pm.response.json().id);"
+            ] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"9780134494166\",\n  \"titulo\": \"Clean Architecture\",\n  \"autor\": \"Robert C. Martin\",\n  \"editorial\": \"Prentice Hall\",\n  \"categoria\": \"Ingenieria de Software\",\n  \"anioPublicacion\": 2017,\n  \"cantidadTotal\": 5\n}" },
+            "url": { "raw": "{{baseUrl}}/api/books", "host": ["{{baseUrl}}"], "path": ["api", "books"] }
+          }
+        },
+        {
+          "name": "Crear libro sin permiso - USER (403)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"9780201633610\",\n  \"titulo\": \"X\",\n  \"autor\": \"Y\",\n  \"cantidadTotal\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/api/books", "host": ["{{baseUrl}}"], "path": ["api", "books"] }
+          }
+        },
+        {
+          "name": "Crear libro ISBN invalido (400)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400', () => pm.response.to.have.status(400));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"0134494163\",\n  \"titulo\": \"X\",\n  \"autor\": \"Y\",\n  \"cantidadTotal\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/api/books", "host": ["{{baseUrl}}"], "path": ["api", "books"] }
+          }
+        },
+        {
+          "name": "Actualizar libro - ADMIN (200)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"9780134494166\",\n  \"titulo\": \"Clean Architecture (2a ed.)\",\n  \"autor\": \"Robert C. Martin\",\n  \"editorial\": \"Prentice Hall\",\n  \"categoria\": \"Ingenieria de Software\",\n  \"anioPublicacion\": 2017,\n  \"cantidadTotal\": 8\n}" },
+            "url": { "raw": "{{baseUrl}}/api/books/{{libroId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{libroId}}"] }
+          }
+        },
+        {
+          "name": "Libro inexistente (404)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('404', () => pm.response.to.have.status(404));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/books/999999", "host": ["{{baseUrl}}"], "path": ["api", "books", "999999"] } }
+        },
+        {
+          "name": "Eliminar libro - ADMIN (204)",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/books/{{libroId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{libroId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "USERS",
+      "item": [
+        {
+          "name": "Perfil propio /me (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"] } }
+        },
+        {
+          "name": "Mi historial (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/me/historial?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "users", "me", "historial"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] } }
+        },
+        {
+          "name": "Listar usuarios - ADMIN (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/admin?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "users", "admin"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] } }
+        }
+      ]
+    },
+    {
+      "name": "LOANS",
+      "item": [
+        {
+          "name": "Crear prestamo (201)",
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.environment.set('prestamoId', pm.response.json().id);"
+            ] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"libroId\": {{libroId}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/loans", "host": ["{{baseUrl}}"], "path": ["api", "loans"] }
+          }
+        },
+        {
+          "name": "Obtener prestamo (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/loans/{{prestamoId}}", "host": ["{{baseUrl}}"], "path": ["api", "loans", "{{prestamoId}}"] } }
+        },
+        {
+          "name": "Listar por estado - ADMIN (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/loans?estado=ACTIVO&page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "loans"], "query": [{ "key": "estado", "value": "ACTIVO" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }] } }
+        },
+        {
+          "name": "Devolver prestamo (200)",
+          "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/loans/{{prestamoId}}/devolucion", "host": ["{{baseUrl}}"], "path": ["api", "loans", "{{prestamoId}}", "devolucion"] } }
+        },
+        {
+          "name": "Doble devolucion (409)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('409', () => pm.response.to.have.status(409));"] } }],
+          "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/loans/{{prestamoId}}/devolucion", "host": ["{{baseUrl}}"], "path": ["api", "loans", "{{prestamoId}}", "devolucion"] } }
+        },
+        {
+          "name": "Vencidos - ADMIN (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/loans/vencidos", "host": ["{{baseUrl}}"], "path": ["api", "loans", "vencidos"] } }
+        },
+        {
+          "name": "Estadisticas - ADMIN (200)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/loans/estadisticas", "host": ["{{baseUrl}}"], "path": ["api", "loans", "estadisticas"] } }
+        }
+      ]
+    }
+  ]
+}

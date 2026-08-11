@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:biblioteca_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  sql:
+    init:
+      mode: never
+
+app:
+  jwt:
+    secret: dGVzdC1zZWNyZXQtY2xhdmUtZGUtcHJ1ZWJhcy1kZS0zMi1ieXRlcy1taW5pbW8tcGFyYS1oczI1Ng==
+    refresh-secret: dGVzdC1yZWZyZXNoLXNlY3JldC1jbGF2ZS1kZS1wcnVlYmFzLTMyLWJ5dGVzLW1pbmltby1oczI1Ng==
+    expiration-ms: 900000
+    refresh-expiration-ms: 604800000
+    issuer: biblioteca-test
+  admin:
+    email: admin@biblioteca.edu
+    password: Admin123!
+  prestamo:
+    dias-vencimiento: 14
+
+logging:
+  level:
+    com.universidad.biblioteca: warn
